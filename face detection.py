@@ -1,14 +1,22 @@
 import cv2
 import sys
 
-cascPath = sys.argv[1]
+cascPath = sys.argv[1] if len(sys.argv) > 1 else cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
 faceCascade = cv2.CascadeClassifier(cascPath)
 
-video_capture = cv2.VideoCapture(0)
+video_capture = cv2.VideoCapture(0, cv2.CAP_AVFOUNDATION)
+
+if not video_capture.isOpened():
+    print("Error: Could not access the camera.")
+    sys.exit()
 
 while True:
     # Capture frame-by-frame
     ret, frame = video_capture.read()
+
+    if not ret:
+        print("Error: Failed to capture image")
+        break
 
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
@@ -16,13 +24,12 @@ while True:
         gray,
         scaleFactor=1.1,
         minNeighbors=5,
-        minSize=(30, 30),
-        flags=cv2.cv.CV_HAAR_SCALE_IMAGE
+        minSize=(30, 30)
     )
 
     # Draw a rectangle around the faces
     for (x, y, w, h) in faces:
-        cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
+        cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
     # Display the resulting frame
     cv2.imshow('Video', frame)
